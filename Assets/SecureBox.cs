@@ -21,8 +21,8 @@ public class SecureBox : MonoBehaviour
         _button.onClick.AddListener(ResetCells);
         _shuffleButton.onClick.AddListener(Shuffle);
         _solution.onClick.AddListener(()=> FindingByMaxAlgorithm(0));
-        var x = Random.Range(10, 15);
-        var y = Random.Range(9, 16);
+        var x = Random.Range(5, 8);
+        var y = Random.Range(5, 8);
         gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         gridLayoutGroup.constraintCount = x;
 
@@ -50,109 +50,94 @@ public class SecureBox : MonoBehaviour
 
         return state + 1;
     }
+
+    async Task MaxAlgo(int state)
+    {
+        var duration = 10;
+        var count = cells.Count(cell => cell.State == state);
+
+        if (count == cells.Count)
+        {
+            Debug.Log("Mission completed");
+            return;
+        }
+    
+        var dictionary = new Dictionary<Cell, int>();
+        var dictionaryState = new Dictionary<Cell, int>();
+        foreach (var cell in cells)
+        {
+            cell.Toggle(true);
+            cell.Toggle(true);
+            dictionary.Add(cell, -100);
+            dictionaryState.Add(cell, -100);
+        
+            var count1 = cells.Count(cell => cell.State == state);
+            if (count < count1)
+            {
+                dictionary[cell] = count1;
+                dictionaryState[cell] = cell.State;
+            }
+        
+            await Task.Delay(duration);
+            cell.Toggle(true);
+            cell.Toggle(true);
+            var count2 = cells.Count(cell => cell.State == state);
+            if (count < count2)
+            {
+                if (count2>count1)
+                {
+                    dictionary[cell] = count2;
+                    dictionaryState[cell] = cell.State;
+                }
+            }
+            foreach (var p in dictionary)
+            {
+                Debug.Log($"{p.Key._x}/{p.Key._y} - {p.Value}");
+            }
+            if (dictionary[cell] == -100)
+            {
+                dictionary.Remove(cell);
+                dictionaryState.Remove(cell);
+            }
+        
+            await Task.Delay(duration);
+        
+            cell.Toggle(true);
+            cell.Toggle(true);
+        
+        }
+        if (dictionary.Count == 0)
+        {
+            Debug.Log($"Dead lock State{state}");
+            //  FindingByMaxAlgorithm(getNextState(state));
+            _solution.interactable = true;
+            return;
+        }
+        await Task.Delay(duration);
+    
+        //var pair = dictionary.First();
+        foreach (var p in dictionary)
+        {
+            /*await Task.Delay(duration);
+            if (pair.Value < p.Value)
+            {
+                pair = p;
+            }*/
+            p.Key.Highlight(p.Value);
+        }
+        /*while (pair.Key.State != dictionaryState[pair.Key])
+        {
+            await Task.Delay(duration);
+            pair.Key.Toggle(true);
+        }*/
+    
+        Debug.Log($"Open count: {cells.Count(cell => cell.State == state)}/{cells.Count} State:{state}");
+    }
     
     async void FindingByMaxAlgorithm(int state)
     {
         _solution.interactable = false;
-
-        var duration = 10;
-
-        while (true)
-        {
-            var counts1 = cells.Count(cell => cell.State == 0);
-            var counts2 = cells.Count(cell => cell.State == 1);
-            var counts3 = cells.Count(cell => cell.State == 2);
-            var count = 0;
-            if (counts1 >= counts2 && counts1 >= counts3)
-            {
-                count = counts1;
-                state = 0;
-            }
-            
-            if (counts2 >= counts1 && counts2 >= counts3)
-            {
-                count = counts2;
-                state = 1;
-            }
-            
-            if (counts3 >= counts1 && counts3 >= counts2)
-            {
-                count = counts3;
-                state = 2;
-            }
-            
-            
-            
-            if (count == cells.Count) return;
-        
-            var dictionary = new Dictionary<Cell, int>();
-            var dictionaryState = new Dictionary<Cell, int>();
-            foreach (var cell in cells)
-            {
-                cell.Toggle(true);
-                dictionary.Add(cell, -100);
-                dictionaryState.Add(cell, -100);
-            
-                var count1 = cells.Count(cell => cell.State == state);
-                if (count < count1)
-                {
-                    dictionary[cell] = count1;
-                    dictionaryState[cell] = cell.State;
-                }
-            
-                await Task.Delay(duration);
-                cell.Toggle(true);
-                var count2 = cells.Count(cell => cell.State == state);
-                if (count < count2)
-                {
-                    if (count2>count1)
-                    {
-                        dictionary[cell] = count2;
-                        dictionaryState[cell] = cell.State;
-                    }
-                }
-
-                if (dictionary[cell] == -100)
-                {
-                    dictionary.Remove(cell);
-                    dictionaryState.Remove(cell);
-                }
-            
-                await Task.Delay(duration);
-            
-                cell.Toggle(true);
-            
-            }
-
-            if (dictionary.Count == 0)
-            {
-                Debug.Log($"Dead lock State{state}");
-                //FindingByMaxAlgorithm(getNextState(state));
-                _solution.interactable = true;
-
-                return;
-            }
-            await Task.Delay(duration);
-        
-            var pair = dictionary.First();
-            foreach (var p in dictionary)
-            {
-                await Task.Delay(duration);
-                if (pair.Value < p.Value)
-                {
-                    pair = p;
-                }
-            }
-
-            while (pair.Key.State != dictionaryState[pair.Key])
-            {
-                await Task.Delay(duration);
-                pair.Key.Toggle(true);
-            }
-        
-            Debug.Log($"Open count: {cells.Count(cell => cell.State == state)}/{cells.Count} State:{state}");
-        }
-        
+        await MaxAlgo(state);
         _solution.interactable = true;
     }
 
@@ -177,10 +162,10 @@ public class SecureBox : MonoBehaviour
     {
         var cellls = cells.ToList();
         cellls.Sort((x, y) => Random.Range(-10000,10000).CompareTo(Random.Range(-10000,10000)));
-        foreach (var cell in cellls.Take(Random.Range(1, cellls.Count/2)))
+        foreach (var cell in cellls.Take(5))
         {
             await Task.Delay(50);
-            cell.Toggle(true);
+            cell.Toggle(true, true);
         }
     }
     

@@ -14,8 +14,8 @@ public class Cell : MonoBehaviour, IPointerClickHandler
     public bool IsY(int y) => _y == y;
     
     private int _state = 0;
-    private int _x;
-    private int _y;
+    public int _x;
+    public int _y;
 
     public void ResetCell()
     {
@@ -39,17 +39,18 @@ public class Cell : MonoBehaviour, IPointerClickHandler
     {
         _x = x;
         _y = y;
-        _coordinate.text = $"{_x},{_y}";
+        //_coordinate.text = $"{_x},{_y}";
     }
     
-    public bool IsSelected = false;
+    public bool IsSelected ;
 
-    public void Toggle(bool isClicked = false)
+    public void Highlight(int count)
     {
-        var duration = isClicked ? 0.1f : 0.1f;
-        var punch = isClicked ? 1.1f : 0.9f;
-        var elasticity = isClicked ? 2f : 1f;
-        //transform.DOPunchScale(Vector3.one * punch, duration, elasticity:elasticity);
+        _coordinate.text = count.ToString();
+    }
+
+    public void Toggle(bool isClicked = false, bool isUser = false)
+    {
         if (_state == 2)
         {
             _state = 0;
@@ -64,7 +65,7 @@ public class Cell : MonoBehaviour, IPointerClickHandler
             OnToggled?.Invoke(_x, _y);
         
         
-        if (!IsSelected && isClicked)
+        if (!IsSelected && isClicked && isUser)
             IsSelected = isClicked;
 
         UpdateStateVisuals();
@@ -73,6 +74,7 @@ public class Cell : MonoBehaviour, IPointerClickHandler
 
     private void UpdateStateVisuals()
     {
+        _coordinate.text = string.Empty;
         if (State == 0)
         {
             _image.color = Color.green;
@@ -102,18 +104,9 @@ public class Cell : MonoBehaviour, IPointerClickHandler
         
         _stateText.text = State.ToString();
     }
-
     
-    
-    
-    
-    
-
- 
-
-
     public void OnPointerClick(PointerEventData eventData)
     {
-        Toggle(true);
+        Toggle(true, true);
     }
 }
