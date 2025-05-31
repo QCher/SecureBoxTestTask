@@ -21,8 +21,8 @@ public class SecureBox : MonoBehaviour
         _button.onClick.AddListener(ResetCells);
         _shuffleButton.onClick.AddListener(Shuffle);
         _solution.onClick.AddListener(()=> FindingByMaxAlgorithm(0));
-        var x = Random.Range(5, 8);
-        var y = Random.Range(5, 8);
+        var x = Random.Range(7, 12);
+        var y = Random.Range(7, 10);
         gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         gridLayoutGroup.constraintCount = x;
 
@@ -68,68 +68,27 @@ public class SecureBox : MonoBehaviour
         {
             cell.Toggle(true);
             cell.Toggle(true);
-            dictionary.Add(cell, -100);
-            dictionaryState.Add(cell, -100);
-        
-            var count1 = cells.Count(cell => cell.State == state);
-            if (count < count1)
-            {
-                dictionary[cell] = count1;
-                dictionaryState[cell] = cell.State;
-            }
-        
+            
+            dictionary[cell] = cells.Count(cell => cell.State == state);
+            dictionaryState[cell] = cell.State;
+            
             await Task.Delay(duration);
+            
             cell.Toggle(true);
-            cell.Toggle(true);
-            var count2 = cells.Count(cell => cell.State == state);
-            if (count < count2)
-            {
-                if (count2>count1)
-                {
-                    dictionary[cell] = count2;
-                    dictionaryState[cell] = cell.State;
-                }
-            }
-            foreach (var p in dictionary)
-            {
-                Debug.Log($"{p.Key._x}/{p.Key._y} - {p.Value}");
-            }
-            if (dictionary[cell] == -100)
-            {
-                dictionary.Remove(cell);
-                dictionaryState.Remove(cell);
-            }
-        
-            await Task.Delay(duration);
-        
-            cell.Toggle(true);
-            cell.Toggle(true);
-        
         }
+        
+        foreach (var p in dictionary)
+        {
+            p.Key.Highlight(p.Value);
+            Debug.Log($"{p.Key._x}/{p.Key._y} - {p.Value}");
+        }
+        
         if (dictionary.Count == 0)
         {
             Debug.Log($"Dead lock State{state}");
-            //  FindingByMaxAlgorithm(getNextState(state));
-            _solution.interactable = true;
             return;
         }
         await Task.Delay(duration);
-    
-        //var pair = dictionary.First();
-        foreach (var p in dictionary)
-        {
-            /*await Task.Delay(duration);
-            if (pair.Value < p.Value)
-            {
-                pair = p;
-            }*/
-            p.Key.Highlight(p.Value);
-        }
-        /*while (pair.Key.State != dictionaryState[pair.Key])
-        {
-            await Task.Delay(duration);
-            pair.Key.Toggle(true);
-        }*/
     
         Debug.Log($"Open count: {cells.Count(cell => cell.State == state)}/{cells.Count} State:{state}");
     }
