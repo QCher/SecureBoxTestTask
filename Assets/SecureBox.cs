@@ -121,7 +121,7 @@ public class SecureBox : MonoBehaviour
     {
         var cellls = cells.ToList();
         cellls.Sort((x, y) => Random.Range(-10000,10000).CompareTo(Random.Range(-10000,10000)));
-        foreach (var cell in cellls.Take(5))
+        foreach (var cell in cellls.Take(Random.Range(7,12)))
         {
             await Task.Delay(50);
             cell.Toggle(true, true);

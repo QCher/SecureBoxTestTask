@@ -107,6 +107,16 @@ public class Cell : MonoBehaviour, IPointerClickHandler
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        Toggle(true, eventData.button == PointerEventData.InputButton.Left);
+        var isRight = eventData.button == PointerEventData.InputButton.Right;
+        if (isRight)
+        {
+            IsSelected = false;
+        }
+        Toggle(true, !isRight);
+        if (isRight)
+        {
+            IsSelected = false;
+        }
+        UpdateStateVisuals();
     }
 }
